@@ -1,34 +1,30 @@
 #!/usr/local/bash
-REFERENCE="GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.gz"
-READ_1="read1.fq"
-READ_2="read2.fq"
+REFERENCE="GCA_000001405.15_GRCh38_no_alt_analysis_set.fna"
+READ_1="data_read1.fq"
+READ_2="data_read2.fq"
 READS="alignment"
 #########################
 #     Read ALIGNMENT    #
 ########################
 
-echo "Indexing the reference genome"
-bwa index -a bwtsw $REFERENCE
-echo "Done indexing"
+#### Generate the BWA index #####       This will generate all the files needed by BWA for alignment
+bwa index -a bwtsw $REFERENCE          # bwtsw is an Algorithm implemented in BWT-SW. This method works with the whole human genome.
 
-echo "Start read alignment"
-bwa mem $REFERENCE $READ_1 $READ_2 > $READS.sam
-echo "Done aligning"
+#### Generate the FASTA file index ####
+samtools faidx $REFERENCE              # This will create a ".fai" file (FASTA index). This allows efficient random access to the reference bases.
 
-# Converting SAM to BAM
-echo "Converting SAM ===> BAM"
+#### Start read alignment ####
+bwa mem $REFERENCE $READ_1 $READ_2 > $READS.sam    # This will produce a alignment.sam file
+
+#### Converting SAM to BAM ####
 samtools view -Sb $READS.sam > $READS.unsorted.bam
-echo "Done converting SAM ===> BAM"
 
-# Sort the alignment file before calling variants
-echo "Sorting BAM file"
+#### Sort the alignment file before calling variants ####
 samtools sort $READS.unsorted.bam -o ANYTHING > $READS.bam
-echo "Done sorting BAM file"
 
-# Index the alignment file [creates a $READS.bam.bai (binary alignment index) file]
-echo "Start indexing BAM file"
+#### Index the alignment file [creates a $READS.bam.bai (binary alignment index) file] ####
 samtools index $READS.bam
-echo "Done indexing BAM file"
+
 
 
 ########################
