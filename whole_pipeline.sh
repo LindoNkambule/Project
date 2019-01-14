@@ -3,6 +3,8 @@ REFERENCE="GCA_000001405.15_GRCh38_no_alt_analysis_set.fna"
 READ_1="data_read1.fq"
 READ_2="data_read2.fq"
 READS="alignment"
+AF_THR="0.01"  # minimum allele frequency
+
 #########################
 #     Read ALIGNMENT    #
 ########################
@@ -35,6 +37,8 @@ samtools index $READS.bam
 Platypus.py callVariants --bamFiles = $READS.bam --refFile=$REFERENCE --output = platypus_variants.vcf  &       # The & is for forking all the processes
 freebayes -f $ $REFERENCE $READS.bam >freeebayes_variants.vcf &
 bcftools mpileup -f $REFERENCE $READS.bam | bcftools call -mv -Ob | bcftools view > bcftools_variants.vcf &
+vardict -G $REFERENCE -f $AF_THR -N sample_name -b $READS -c 1 -S 2 -E 3 -g 4 $BED | teststrandbias.R | var2vcf_valid.pl -N sample_name -E -f $AF_THR &
+
 
 wait
 echo "All processes complete"
