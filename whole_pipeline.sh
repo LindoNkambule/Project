@@ -4,7 +4,7 @@ READ_1="data_read1.fq"
 READ_2="data_read2.fq"
 READS="alignment"
 AF_THR="0.01"  # minimum allele frequency
-
+BED="aligned"
 #########################
 #     Read ALIGNMENT    #
 ########################
@@ -22,12 +22,13 @@ bwa mem $REFERENCE $READ_1 $READ_2 > $READS.sam    # This will produce a alignme
 samtools view -Sb $READS.sam > $READS.unsorted.bam
 
 #### Sort the alignment file before calling variants ####
-samtools sort $READS.unsorted.bam -o ANYTHING > $READS.bam
+samtools sort $READS.unsorted.bam -o $READS.bam
 
 #### Index the alignment file [creates a $READS.bam.bai (binary alignment index) file] ####
 samtools index $READS.bam
 
-
+#### Generating BED file to use for VarDict ####
+bedtools bamtobed -i $READS.bam > $BED.bed
 
 ########################
 #    CALL VARIANTS     #
@@ -37,7 +38,7 @@ samtools index $READS.bam
 Platypus.py callVariants --bamFiles = $READS.bam --refFile=$REFERENCE --output = platypus_variants.vcf  &       # The & is for forking all the processes
 freebayes -f $ $REFERENCE $READS.bam >freeebayes_variants.vcf &
 bcftools mpileup -f $REFERENCE $READS.bam | bcftools call -mv -Ob | bcftools view > bcftools_variants.vcf &
-vardict -G $REFERENCE -f $AF_THR -N sample_name -b $READS -c 1 -S 2 -E 3 -g 4 $BED | teststrandbias.R | var2vcf_valid.pl -N sample_name -E -f $AF_THR &
+vardict -G $REFERENCE -f $AF_THR -N sample_name -b $READS.bam -c 1 -S 2 -E 3 -g 4 $BED.bed | teststrandbias.R | var2vcf_valid.pl -N sample_name -E -f $AF_THR &
 
 
 wait
