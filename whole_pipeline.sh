@@ -39,7 +39,16 @@ Platypus.py callVariants --bamFiles = $READS.bam --refFile=$REFERENCE --output =
 freebayes -f $ $REFERENCE $READS.bam >freeebayes_variants.vcf &
 bcftools mpileup -f $REFERENCE $READS.bam | bcftools call -mv -Ob | bcftools view > bcftools_variants.vcf &
 vardict -G $REFERENCE -f $AF_THR -N sample_name -b $READS.bam -c 1 -S 2 -E 3 -g 4 $BED.bed | teststrandbias.R | var2vcf_valid.pl -N sample_name -E -f $AF_THR &
-
-
 wait
 echo "All processes complete"
+
+
+
+#######################
+#       STORAGE      #
+######################
+mkdir Reference/; mv GCA_000001405.15_GRCh38_no_alt_analysis_set.fna* alignment.* Reference/       # Make a directory called Reference and move all the reference and alignment files to the folder
+mkdir Variants/; mv *.vcf Variants/  # Make a directory called Variants and move all the vcf files into it
+
+zip -r Variants.zip Variants/  # Zip the folder for long term storage
+zip -r Reference.zip Reference/ # Zip the folder for long term storage 
