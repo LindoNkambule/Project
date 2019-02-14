@@ -2,7 +2,7 @@
 REFERENCE="GCA_000001405.15_GRCh38_no_alt_analysis_set.fna"
 READ_1="data_read1.fq"
 READ_2="data_read2.fq"
-READS="alignment"
+READS="aligned_reads"
 AF_THR="0.01"  # minimum allele frequency
 BED="aligned"
 PICARD="/usr/local/pipeline/Tools/picard.jar"
@@ -30,17 +30,24 @@ bwa index -a bwtsw $REFERENCE          # bwtsw is an Algorithm implemented in BW
 #Start read alignment
 bwa mem $REFERENCE $READ_1 $READ_2 > $READS.sam    # This will produce a alignment.sam file
 
-#Converting SAM to BAM
-samtools view -Sb $READS.sam > $READS.unsorted.bam
+# Sorting SAM by coordinate and Converting SAM to BAM
+java -jar $PICARD SortSam \
+    INPUT=aligned_reads.sam \
+    OUTPUT=sorted_reads.bam \
+    SORT_ORDER=coordinate   #The output contains the aligned reads (BAM) sorted by coordinate
 
-#Sort the alignment file before calling variants
-samtools sort $READS.unsorted.bam -o $READS.srtd.bam
+# Mark MarkDuplicates
+java -jar $PICARD MarkDuplicates \
+    INPUT=sorted_reads.bam \
+    OUTPUT=dedup_reads.bam \
+    METRICS_FILE=metrics.txt
 
 #Index the alignment file [creates a $READS.bam.bai (binary alignment index) file]
-samtools index $READS.srtd.bam
+java -jar picard.jar BuildBamIndex \
+    INPUT=dedup_reads.bam
 
 #Generating BED file to use for VarDict
-bedtools bamtobed -i $READS.srtd.bam > $BED.bed
+bedtools bamtobed -i dedup_reads.bam > $BED.bed
 
 
 ########################
