@@ -1,5 +1,6 @@
 #!/usr/local/bash
 REFERENCE="GCA_000001405.15_GRCh38_no_alt_analysis_set.fna"
+DICTIONARY=${REFERENCE%.*}
 READ_1="data_read1.fq"
 READ_2="data_read2.fq"
 READS="aligned_reads"
@@ -7,6 +8,7 @@ AF_THR="0.01"  # minimum allele frequency
 BED="aligned"
 PICARD="/usr/local/pipeline/Tools/picard.jar"
 GATK="/usr/local/pipeline/Tools/gatk-4.1.0.0/gatk-package-4.1.0.0-local.jar"
+gatk="/usr/local/pipeline/Tools/gatk-4.1.0.0/gatk"
 
 
 ##################################################
@@ -17,7 +19,7 @@ GATK="/usr/local/pipeline/Tools/gatk-4.1.0.0/gatk-package-4.1.0.0-local.jar"
 samtools faidx $REFERENCE              # This will create a ".fai" file (FASTA index). This allows efficient random access to the reference bases.
 
 #Generate a FASTA sequence dictionary file
-java -jar $PICARD CreateSequenceDictionary R= $REFERENCE O= $REFERENCE.dict          #Create a dictionary of the contig names and sizes
+java -jar $PICARD CreateSequenceDictionary R= $REFERENCE O= $DICTIONARY.dict          #Create a dictionary of the contig names and sizes
 
 #Generate the BWA index                This will generate all the files needed by BWA for alignment
 bwa index -a bwtsw $REFERENCE          # bwtsw is an Algorithm implemented in BWT-SW. This method works with the whole human genome.
@@ -42,12 +44,22 @@ java -jar $PICARD MarkDuplicates \
     OUTPUT=dedup_reads.bam \
     METRICS_FILE=metrics.txt
 
-#Index the alignment file [creates a $READS.bam.bai (binary alignment index) file]
-java -jar picard.jar BuildBamIndex \
-    INPUT=dedup_reads.bam
+#Add read groups
+java -jar $PICARD AddOrReplaceReadGroups \
+      I=dedup_reads.bam \
+      O=output.bam \
+      RGID=4 \
+      RGLB=lib1 \
+      RGPL=illumina \
+      RGPU=unit1 \
+      RGSM=20
+
+#Index the BAM file [creates a output.bam.bai (binary alignment index) file]
+java -jar $PICARD BuildBamIndex \
+    INPUT=output.bam
 
 #Generating BED file to use for VarDict
-bedtools bamtobed -i dedup_reads.bam > $BED.bed
+bedtools bamtobed -i output.bam > $BED.bed
 
 
 ########################
@@ -55,10 +67,12 @@ bedtools bamtobed -i dedup_reads.bam > $BED.bed
 ########################
 
 # All the processes will be forked in parallel (&) and the script will wait ("wait") until all the processes have completed before moving to the next command
-Platypus.py callVariants --bamFiles = $READS.bam --refFile=$REFERENCE --output = platypus_variants.vcf  &       # The & is for forking all the processes
-freebayes -f $REFERENCE dedup_reads.bam >freeebayes.vcf &
-bcftools mpileup -Ou -f $REFERENCE dedup_reads.bam | bcftools call -mv -Ob | bcftools view > bcftools.vcf &
-vardict -G $REFERENCE -f $AF_THR -N sample_name -b $READS.bam -c 1 -S 2 -E 3 -g 4 $BED.bed | teststrandbias.R | var2vcf_valid.pl -N sample_name -E -f $AF_THR &
+freebayes -f $REFERENCE output.bam >freeebayes.vcf &   # The & is for forking all the processes
+bcftools mpileup -Ou -f $REFERENCE output.bam | bcftools call -mv -Ob | bcftools view > bcftools.vcf &
+$gatk HaplotypeCaller \
+    -R $REFERENCE \
+    -I output.bam \
+    -O gatk.vcf &
 wait
 echo "All processes complete"
 
