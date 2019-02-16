@@ -56,8 +56,8 @@ bedtools bamtobed -i dedup_reads.bam > $BED.bed
 
 # All the processes will be forked in parallel (&) and the script will wait ("wait") until all the processes have completed before moving to the next command
 Platypus.py callVariants --bamFiles = $READS.bam --refFile=$REFERENCE --output = platypus_variants.vcf  &       # The & is for forking all the processes
-freebayes -f $ $REFERENCE $READS.bam >freeebayes_variants.vcf &
-bcftools mpileup -f $REFERENCE $READS.bam | bcftools call -mv -Ob | bcftools view > bcftools_variants.vcf &
+freebayes -f $REFERENCE dedup_reads.bam >freeebayes.vcf &
+bcftools mpileup -Ou -f $REFERENCE dedup_reads.bam | bcftools call -mv -Ob | bcftools view > bcftools.vcf &
 vardict -G $REFERENCE -f $AF_THR -N sample_name -b $READS.bam -c 1 -S 2 -E 3 -g 4 $BED.bed | teststrandbias.R | var2vcf_valid.pl -N sample_name -E -f $AF_THR &
 wait
 echo "All processes complete"
