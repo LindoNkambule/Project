@@ -44,7 +44,7 @@ java -jar $PICARD MarkDuplicates \
     OUTPUT=dedup_reads.bam \
     METRICS_FILE=metrics.txt
 
-#Add read groups
+#Add read groups. Assigns all the reads in a file to a single new read-group
 java -jar $PICARD AddOrReplaceReadGroups \
       I=dedup_reads.bam \
       O=output.bam \

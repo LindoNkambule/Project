@@ -58,12 +58,12 @@ RUN wget -O /tmp/fastqc_v0.11.7.zip http://www.bioinformatics.babraham.ac.uk/pro
     cd /usr/local/pipeline/Tools/FastQC && \
     chmod +x /usr/local/pipeline/Tools/FastQC/fastqc && \
     ln -s /usr/local/pipeline/Tools/FastQC/fastqc /usr/local/bin/fastqc
-RUN wget -O /tmp/bwa-0.7.17.tar.bz2 http://sourceforge.net/projects/bio-bwa/files/bwa-0.7.17.tar.bz2 && \
+RUN wget -O /tmp/bwa-0.7.17.tar.bz2 https://liquidtelecom.dl.sourceforge.net/project/bio-bwa/bwa-0.7.17.tar.bz2 && \
     tar -xjvf /tmp/bwa-0.7.17.tar.bz2 -C /usr/local/pipeline/Tools && \
     chmod -R 777 /usr/local/pipeline/Tools && \
     cd /usr/local/pipeline/Tools/bwa-0.7.17 && make && \
     cp -v /usr/local/pipeline/Tools/bwa-0.7.17/bwa /usr/local/bin
-RUN wget -O /tmp/samtools-1.9.tar.bz2 https://sourceforge.net/projects/samtools/files/samtools/1.9/samtools-1.9.tar.bz2 && \
+RUN wget -O /tmp/samtools-1.9.tar.bz2 https://liquidtelecom.dl.sourceforge.net/project/samtools/samtools/1.9/samtools-1.9.tar.bz2 && \
     tar -xvjf /tmp/samtools-1.9.tar.bz2 -C /usr/local/pipeline/Tools && \
     chmod -R 777 /usr/local/pipeline/Tools && \
     cd /usr/local/pipeline/Tools/samtools-1.9 && make && \
@@ -116,11 +116,6 @@ RUN cd /tmp && \
     chmod -R 777 ./* && \
     cp -vrf ./bin/* /usr/local/bin && \
     ln -s .bin/* /usr/local/bin
-RUN wget -O /tmp/samtools-1.9.tar.bz2 https://sourceforge.net/projects/samtools/files/samtools/1.9/samtools-1.9.tar.bz2 && \
-    tar -xvjf /tmp/samtools-1.9.tar.bz2 -C /usr/local/pipeline/Tools && \
-    chmod -R 777 /usr/local/pipeline/Tools && \
-    cd /usr/local/pipeline/Tools/samtools-1.9 && make && \
-    cp -v /usr/local/pipeline/Tools/samtools-1.9/samtools /usr/local/bin
 RUN cd /usr/local/pipeline/Tools && \
     git clone --recursive https://github.com/AstraZeneca-NGS/VarDictJava.git && \
     cd VarDictJava && \
