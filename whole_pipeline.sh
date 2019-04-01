@@ -67,6 +67,7 @@ bedtools bamtobed -i output.bam > $BED.bed
 ########################
 
 # All the processes will be forked in parallel (&) and the script will wait ("wait") until all the processes have completed before moving to the next command
+### Single sample calling ###
 freebayes -f $REFERENCE output.bam >freeebayes.vcf &   # The & is for forking all the processes
 bcftools mpileup -Ou -f $REFERENCE output.bam | bcftools call -mv -Ob | bcftools view > bcftools.vcf &
 $gatk HaplotypeCaller \
@@ -75,6 +76,10 @@ $gatk HaplotypeCaller \
     -O gatk.vcf &
 wait
 echo "All processes complete"
+
+### Joint calling ###
+  freebayes -f $REFERENCE sample1.bam sample2.bam sample3 >freebayes_jointcall.vcf
+
 
 
 #######################
