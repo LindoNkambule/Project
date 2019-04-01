@@ -70,6 +70,7 @@ bedtools bamtobed -i output.bam > $BED.bed
 ### Single sample calling ###
 freebayes -f $REFERENCE output.bam >freeebayes.vcf &   # The & is for forking all the processes
 bcftools mpileup -Ou -f $REFERENCE output.bam | bcftools call -mv -Ob | bcftools view > bcftools.vcf &
+vardict -G $REFERENCE -f $AF_THR -N sample_name -b output.bam -c 1 -S 2 -E 3 -g 4 aligned.bed | teststrandbias.R | var2vcf_valid.pl -N vardict -E -f $AF_THR > vardict.vcf &
 $gatk HaplotypeCaller \
     -R $REFERENCE \
     -I output.bam \
