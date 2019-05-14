@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 MAINTAINER Lindo Nkambule (lindonkambule116@gmail.com)
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 RUN apt-get update && \
@@ -32,7 +32,7 @@ RUN apt-get update && \
     sudo \
     wget \
     perl \
-    python-software-properties \
+    software-properties-common \
     pkg-config \
     unzip \
     ncurses-dev \
@@ -41,23 +41,11 @@ RUN apt-get update && \
     xvfb \
     zlib1g-dev
 RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y  software-properties-common && \
-    add-apt-repository ppa:webupd8team/java && \
-    apt-get update && \
-    echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" | sudo debconf-set-selections && \
-    apt-get install -y oracle-java8-installer && \
-    apt-get install oracle-java8-set-default && \
-    apt-get clean
+    apt-get install -y openjdk-8-jdk openjdk-8-jre-headless
 RUN mkdir -p /usr/local/pipeline/Data
 RUN mkdir -p /usr/local/pipeline/Scripts
 RUN mkdir -p /usr/local/pipeline/Tools
 COPY whole_pipeline.sh /usr/local/pipeline/Scripts
-RUN wget -O /tmp/fastqc_v0.11.7.zip http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.7.zip && \
-    unzip /tmp/fastqc_v0.11.7.zip -d /usr/local/pipeline/Tools && \
-    cd /usr/local/pipeline/Tools/FastQC && \
-    chmod +x /usr/local/pipeline/Tools/FastQC/fastqc && \
-    ln -s /usr/local/pipeline/Tools/FastQC/fastqc /usr/local/bin/fastqc
 RUN wget -O /tmp/bwa-0.7.17.tar.bz2 https://liquidtelecom.dl.sourceforge.net/project/bio-bwa/bwa-0.7.17.tar.bz2 && \
     tar -xjvf /tmp/bwa-0.7.17.tar.bz2 -C /usr/local/pipeline/Tools && \
     chmod -R 777 /usr/local/pipeline/Tools && \
@@ -90,38 +78,6 @@ RUN cd /tmp && \
     cd freebayes/ && \
     make && \
     sudo make install
-RUN cd /tmp && \
-    wget https://github.com/cython/cython/archive/0.28.5.tar.gz && \
-    chmod 777 0.28.5.tar.gz && \
-    tar -xvzf 0.28.5.tar.gz && \
-    cd cython-0.28.5 && \
-    python setup.py install
-RUN cd /tmp && \
-    wget https://github.com/samtools/htslib/releases/download/1.9/htslib-1.9.tar.bz2 && \
-    tar -xjvf htslib-1.9.tar.bz2 && \
-    chmod -R 777 htslib-1.9 && \
-    cd htslib-1.9 && \
-    autoconf && \
-    ./configure && \
-    make && \
-    make install
-ENV C_INCLUDE_PATH /usr/local/include
-ENV LIBRARY_PATH /usr/local/lib
-ENV LD_LIBRARY_PATH /usr/local/lib
-RUN cd /tmp && \
-    git clone https://github.com/andyrimmer/Platypus.git && \
-    chmod -R 777 Platypus && \
-    cd Platypus && \
-    make && \
-    chmod -R 777 ./* && \
-    cp -vrf ./bin/* /usr/local/bin && \
-    ln -s .bin/* /usr/local/bin
-RUN cd /usr/local/pipeline/Tools && \
-    git clone --recursive https://github.com/AstraZeneca-NGS/VarDictJava.git && \
-    cd VarDictJava && \
-    ./gradlew clean installDist && \
-    ./gradlew distZip && \
-    cp -r /usr/local/pipeline/Tools/VarDictJava/VarDict/* /usr/local/bin/
 RUN cd /usr/local/pipeline/Tools && \
     wget https://github.com/broadinstitute/picard/releases/download/2.18.26/picard.jar
 RUN wget -O /tmp/gatk-4.1.0.0.zip https://github.com/broadinstitute/gatk/releases/download/4.1.0.0/gatk-4.1.0.0.zip && \
