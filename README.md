@@ -9,8 +9,9 @@ update-java-alternatives --list
 If you want to use only GATK, you have to set JDK 8 as the default version. Run the following command:
 ```
 update-alternatives --config java
+#Select option 2, JDK 8.
 ```
-Select option 2, JDK 8.
+
 
 
 If you want to run a variant calling pipeline, from data preparation, alignment, to variant calling, please set a java variable (for JDK 11) as shown in line 12 of the 'whole_pipeline.sh' script. This is because PICARD tools gives an error when you run it using JDK 8. I am still working on finding what's causing the issue.
