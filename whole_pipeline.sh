@@ -4,8 +4,6 @@ DICTIONARY=${REFERENCE%.*}
 READ_1="data_read1.fq"
 READ_2="data_read2.fq"
 READS="aligned_reads"
-AF_THR="0.01"  # minimum allele frequency
-BED="aligned"
 PICARD="/usr/local/pipeline/Tools/picard.jar"
 GATK="/usr/local/pipeline/Tools/gatk-4.1.0.0/gatk-package-4.1.0.0-local.jar"
 gatk="/usr/local/pipeline/Tools/gatk-4.1.0.0/gatk"
@@ -59,10 +57,6 @@ $java -jar $PICARD AddOrReplaceReadGroups \
 $java -jar $PICARD BuildBamIndex \
     INPUT=output.bam
 
-#Generating BED file to use for VarDict
-bedtools bamtobed -i output.bam > $BED.bed
-
-
 ########################
 #    CALL VARIANTS     #
 ########################
@@ -77,7 +71,3 @@ $gatk HaplotypeCaller \
     -O gatk.vcf &
 wait
 echo "All processes complete"
-
-#######################
-#       STORAGE      #
-######################
