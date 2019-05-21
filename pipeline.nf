@@ -25,7 +25,7 @@
           GENOME        : ${params.reference}
           GENOME INDEX  : ${params.refindex}
           DICTIONARY    : ${params.dict}
- 	        BAM FILES     : ${bam_files}
+          BAM FILES     : ${bam_files}
           OUTDIR        : ${params.outdir}
           """
           .stripIndent()
@@ -45,8 +45,8 @@ process '1A_variant_calling' {
       file bamindex from bam_index
 
   output:
-      file "${bam.baseName}_gatk.vcf" into VCF
-      file "${bam.baseName}.g.vcf" into GVCF
+      file "${bam.baseName}_gatk.vcf" into GATK_VCF
+      file "${bam.baseName}.g.vcf" into GATK_GVCF
 
   script:
   """
