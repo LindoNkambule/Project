@@ -23,8 +23,8 @@ There is an image on Docker Hub with GATK already installed. To run the variant 
 nextflow run pipeline.nf -with-docker lindonkambule/project_gatk
 ```
 
-# Runnin variant calling with GATK using nextflow and Singularity
+# Running variant calling with GATK using nextflow and Singularity
+With the command below, nextflow will run the variant calling pipeline using Singularity but with the specified Docker image. Yes, Docker image. The 'docker://' option will download the specified Docker image from Docker Hub. This image will then be converted to a Singularity image for the -with-singularity option to work.
 ```
 nextflow run pipeline.nf -with-singularity docker://lindonkambule/project_gatk
 ```
-With the above command, nextflow will run the variant calling pipeline using Singularity but with the specified Docker image. Yes, Docker image. The 'docker://' option will download the specified Docker image from Docker Hub. This image will then be converted to a Singularity image for the -with-singularity option to work.
