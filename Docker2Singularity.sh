@@ -2,9 +2,10 @@
 #docker run singularityware/docker2singularity
 
 docker run -v /var/run/docker.sock:/var/run/docker.sock \
--v /path/to/directory:/output \
+-v /Users/lindokuhle/Desktop/Project:/output \
 --privileged -t --rm \
 singularityware/docker2singularity \
+-w \
 --name honours_project ubuntu:18.04
 
 #-v specify the path in which you want to save the singularity image to
